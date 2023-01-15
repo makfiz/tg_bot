@@ -1,12 +1,18 @@
-import { Markup } from 'telegraf';
+const { Markup } = require('telegraf');
 
-export function getMainMenu() {
+ function getMainMenu() {
   return Markup.keyboard([['Видео', 'img'], ['Новые картинки']]).resize();
 }
 
-export function yesNoKeyboard() {
+ function yesNoKeyboard() {
   return Markup.inlineKeyboard(
     [Markup.button.callback('Да', 'yes'), Markup.button.callback('Нет', 'no')],
     { columns: 2 }
   );
+}
+
+
+module.exports = {
+  getMainMenu,
+  yesNoKeyboard
 }
