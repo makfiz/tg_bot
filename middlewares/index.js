@@ -1,15 +1,16 @@
-function tryCatchWrapper(Fn) {
-  return async (req, res, next) => {
-    try {
-      await Fn(req, res, next);
-    } catch (error) {
-      return next(error);
+const { newError } = require('../helpers/index');
+
+function validateBody(schema) {
+  return (req, res, next) => {
+    const { error } = schema.validate(req.body);
+    if (error) {
+      return next(newError(400, error.message));
     }
+
+    return next();
   };
 }
 
-
-
 module.exports = {
-  tryCatchWrapper,
+  validateBody,
 };

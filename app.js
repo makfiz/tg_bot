@@ -4,9 +4,9 @@ const cors = require('cors');
 
 const contactsRouter = require('./routes/api/contacts');
 const bot = require('./tgBot');
-
-const app = express();
 bot.launch();
+const app = express();
+
 const formatsLogger = app.get('env') === 'development' ? 'dev' : 'short';
 
 app.use(logger(formatsLogger));
