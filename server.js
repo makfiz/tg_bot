@@ -1,11 +1,8 @@
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
+const { HOST_URI, PORT } = require('./config');
 const app = require('./app');
 
-dotenv.config();
 mongoose.set('strictQuery', false);
-
-const { HOST_URI, PORT } = process.env;
 
 (async function runApp() {
   try {
@@ -13,7 +10,7 @@ const { HOST_URI, PORT } = process.env;
     console.log('Database connection successful');
 
     app.listen(PORT, () => {
-      console.log(`Server running. Use our API on port: ${PORT}`);
+      console.log(`Server running. Use our API on PORT: ${PORT}`);
     });
   } catch (error) {
     console.error('Server running failed:', error.message);

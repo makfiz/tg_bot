@@ -1,29 +1,65 @@
-const { Telegraf } = require('telegraf');
-const TOKEN = '5890330997:AAFxzReJNm7IzLfTkxKDI89S-qqn-k5IqMw';
+const { Telegraf, session, Scenes } = require('telegraf');
+
+const { TOKEN } = require('./config');
+
 const bot = new Telegraf(TOKEN);
 
 const { getMainMenu, yesNoKeyboard } = require('./keyboards.js');
 
+const userWizard = new Scenes.WizardScene(
+  'user-wizard',
+  ctx => {
+    ctx.reply('What is your name?');
+
+    //Necessary for store the input
+    ctx.scene.session.user = {};
+
+    //Store the telegram user id
+    ctx.scene.session.user.userId = ctx.from.id;
+    return ctx.wizard.next();
+  },
+  ctx => {
+    //Validate the name
+    if (ctx.message.text.length < 1 || ctx.message.text.length > 12) {
+      return ctx.reply('Name entered has an invalid length!');
+    }
+
+    //Store the entered name
+    ctx.scene.session.user.name = ctx.message.text;
+    ctx.reply('What is your last name?');
+    return ctx.wizard.next();
+  },
+  async ctx => {
+    //Validate last name
+    if (ctx.message.text.length > 30) {
+      return ctx.reply('Last name has an invalid length');
+    }
+
+    ctx.scene.session.user.lastName = ctx.message.text;
+    console.log(ctx.scene.session.user);
+    //Store the user in a separate controller
+    // userController.StoreUser(ctx.scene.session.user);
+    return ctx.scene.leave(); //<- Leaving a scene will clear the session automatically
+  }
+);
+
+const stage = new Scenes.Stage([userWizard]);
+
+bot.use(session());
+bot.use(stage.middleware());
+bot.command('/sub', Scenes.Stage.enter('user-wizard'));
+
 bot.start(ctx => {
   ctx.replyWithHTML(
-    'Приветсвую в <b>TaskManagerBot</b>\n\n' +
-      'Чтобы быстро добавить задачу, просто напишите ее и отправьте боту',
+    'Приветсвую в <b>DS Irbis Bot</b>\n\n' + 'Чем я могу вам помочь?',
     getMainMenu()
   );
-});
-
-bot.hears('Мои задачи', ctx => {
-  ctx.reply('Тут будут ваши задачи');
 });
 
 bot.hears('Admin:4815162342', async ctx => {
   await ctx.reply(
     `${ctx.from.username} have been granted administrator privileges id:${ctx.from.id}`
   );
-});
-
-bot.hears('Добавить задачу', ctx => {
-  ctx.reply('Тут вы сможете добавить свои задачи');
 });
 
 bot.hears('Смотивируй меня', ctx => {
@@ -45,7 +81,9 @@ bot.hears('Новые картинки', ctx => {
 bot.hears('Видео', ctx => {
   ctx.replyWithVideo({ source: '1.mp4' });
 });
-bot.command('oldschool', ctx => ctx.reply('Hello'));
+bot.command('submit', async ctx => {
+  await ctx.reply('Введите ваше имя');
+});
 
 bot.catch;
 
